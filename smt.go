@@ -105,6 +105,12 @@ func (smt *SparseMerkleTree) Update(key []byte, value []byte) ([]byte, error) {
 		return nil, err
 	}
 	smt.SetRoot(newRoot)
+
+	//// store secureKey to actual key mapping in db
+	//if err = smt.secKeys.Set(path, key); err != nil {
+	//	return nil, err
+	//}
+
 	return newRoot, nil
 }
 
@@ -455,3 +461,14 @@ func (smt *SparseMerkleTree) ProveCompactForRoot(key []byte, root []byte) (Spars
 	compactedProof, err := CompactProof(proof, smt.th.hasher)
 	return compactedProof, err
 }
+
+func (smt *SparseMerkleTree) NewIterator() Iterator {
+	return &iterator{
+		trie:  smt,
+		stack: make([]*iteratorState, 0),
+	}
+}
+
+//func (smt *SparseMerkleTree) GetActualKey(secureKey []byte) ([]byte, error) {
+//	return smt.secKeys.Get(secureKey)
+//}
