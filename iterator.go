@@ -82,7 +82,7 @@ func (i *iterator) next(descend bool) (*iteratorState, error) {
 	}
 
 	for len(i.stack) > 0 {
-		parent := i.stack[len(i.stack)-1]
+		parent := i.peek()
 
 		// find the next child node
 		child, shouldPop, err := i.nextChild(parent)
@@ -108,6 +108,10 @@ func (i *iterator) pop() {
 
 func (i *iterator) push(node *iteratorState) {
 	i.stack = append(i.stack, node)
+}
+
+func (i *iterator) peek() *iteratorState {
+	return i.stack[len(i.stack)-1]
 }
 
 // nextChild returns the next child node, follows the pre-order traversal.
@@ -165,19 +169,19 @@ func (i *iterator) nextChild(nodeState *iteratorState) (child *iteratorState, po
 
 // Leaf returns true iff the current node is a leaf node
 func (i *iterator) Leaf() bool {
-	node := i.stack[len(i.stack)-1]
+	node := i.peek()
 
 	return i.trie.th.isLeaf(node.rawNode)
 }
 
 // NodeBlob returns the raw node
 func (i *iterator) NodeBlob() []byte {
-	return i.stack[len(i.stack)-1].rawNode
+	return i.peek().rawNode
 }
 
 // LeafKey returns the hashed key associated with the leaf node
 func (i *iterator) LeafKey() []byte {
-	leaf := i.stack[len(i.stack)-1]
+	leaf := i.peek()
 
 	key, _ := i.trie.th.parseLeaf(leaf.rawNode)
 
@@ -186,7 +190,7 @@ func (i *iterator) LeafKey() []byte {
 
 // LeafValue returns the actual value of the leaf node
 func (i *iterator) LeafValue() ([]byte, error) {
-	leaf := i.stack[len(i.stack)-1]
+	leaf := i.peek()
 
 	path, _ := i.trie.th.parseLeaf(leaf.rawNode)
 
