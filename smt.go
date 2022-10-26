@@ -106,7 +106,7 @@ func (smt *SparseMerkleTree) Update(key []byte, value []byte) ([]byte, error) {
 	}
 
 	smt.SetRoot(newRoot)
-	
+
 	return newRoot, nil
 }
 
@@ -464,7 +464,3 @@ func (smt *SparseMerkleTree) NewIterator() Iterator {
 		stack: make([]*iteratorState, 0),
 	}
 }
-
-//func (smt *SparseMerkleTree) GetActualKey(secureKey []byte) ([]byte, error) {
-//	return smt.secKeys.Get(secureKey)
-//}
