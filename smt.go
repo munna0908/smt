@@ -104,7 +104,9 @@ func (smt *SparseMerkleTree) Update(key []byte, value []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	smt.SetRoot(newRoot)
+
 	return newRoot, nil
 }
 
@@ -454,4 +456,11 @@ func (smt *SparseMerkleTree) ProveCompactForRoot(key []byte, root []byte) (Spars
 	}
 	compactedProof, err := CompactProof(proof, smt.th.hasher)
 	return compactedProof, err
+}
+
+func (smt *SparseMerkleTree) NewIterator() Iterator {
+	return &iterator{
+		trie:  smt,
+		stack: make([]*iteratorState, 0),
+	}
 }
