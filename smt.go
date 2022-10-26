@@ -104,13 +104,9 @@ func (smt *SparseMerkleTree) Update(key []byte, value []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	smt.SetRoot(newRoot)
-
-	//// store secureKey to actual key mapping in db
-	//if err = smt.secKeys.Set(path, key); err != nil {
-	//	return nil, err
-	//}
-
+	
 	return newRoot, nil
 }
 
