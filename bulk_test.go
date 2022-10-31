@@ -31,8 +31,8 @@ func bulkOperations(t *testing.T, operations int, insert int, update int, delete
 	for i := 0; i < operations; i++ {
 		n := rand.Intn(max)
 		if n < insert { // Insert
-			keyLen := 16 + rand.Intn(32)
-			key := make([]byte, keyLen)
+
+			key := make([]byte, 32)
 			rand.Read(key)
 
 			valLen := 1 + rand.Intn(64)
@@ -114,12 +114,12 @@ func bulkCheckAll(t *testing.T, smt *SparseMerkleTree, kv *map[string]string) {
 			if v2 == "" {
 				continue
 			}
-			commonPrefix := countCommonPrefix(smt.th.path([]byte(k)), smt.th.path([]byte(k2)))
+			commonPrefix := countCommonPrefix([]byte(k), []byte(k2))
 			if commonPrefix != smt.depth() && commonPrefix > largestCommonPrefix {
 				largestCommonPrefix = commonPrefix
 			}
 		}
-		sideNodes, _, _, _, err := smt.sideNodesForRoot(smt.th.path([]byte(k)), smt.Root(), false)
+		sideNodes, _, _, _, err := smt.sideNodesForRoot([]byte(k), smt.Root(), false)
 		if err != nil {
 			t.Errorf("error: %v", err)
 		}

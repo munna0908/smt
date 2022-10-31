@@ -72,7 +72,10 @@ func (smt *SparseMerkleTree) GetDescend(key []byte) ([]byte, error) {
 		return defaultValue, nil
 	}
 
-	path := smt.th.path(key)
+	if len(key) != smt.th.hasher.Size() {
+		key = smt.th.path(key)
+	}
+
 	currentHash := root
 	for i := 0; i < smt.depth(); i++ {
 		currentData, err := smt.nodes.Get(currentHash)
@@ -81,12 +84,12 @@ func (smt *SparseMerkleTree) GetDescend(key []byte) ([]byte, error) {
 		} else if smt.th.isLeaf(currentData) {
 			// We've reached the end. Is this the actual leaf?
 			p, _ := smt.th.parseLeaf(currentData)
-			if !bytes.Equal(path, p) {
+			if !bytes.Equal(key, p) {
 				// Nope. Therefore the key is actually empty.
 				return defaultValue, nil
 			}
 			// Otherwise, yes. Return the value.
-			value, err := smt.values.Get(path)
+			value, err := smt.values.Get(key)
 			if err != nil {
 				return nil, err
 			}
@@ -94,7 +97,7 @@ func (smt *SparseMerkleTree) GetDescend(key []byte) ([]byte, error) {
 		}
 
 		leftNode, rightNode := smt.th.parseNode(currentData)
-		if getBitAtFromMSB(path, i) == right {
+		if getBitAtFromMSB(key, i) == right {
 			currentHash = rightNode
 		} else {
 			currentHash = leftNode
@@ -109,7 +112,7 @@ func (smt *SparseMerkleTree) GetDescend(key []byte) ([]byte, error) {
 	// The following lines of code should only be reached if the path is 256
 	// nodes high, which should be very unlikely if the underlying hash function
 	// is collision-resistant.
-	value, err := smt.values.Get(path)
+	value, err := smt.values.Get(key)
 	if err != nil {
 		return nil, err
 	}
