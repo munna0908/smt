@@ -80,7 +80,7 @@ func bulkOperations(t *testing.T, operations int, insert int, update int, delete
 
 func bulkCheckAll(t *testing.T, smt *SparseMerkleTree, kv *map[string]string) {
 	for k, v := range *kv {
-		value, err := smt.Get([]byte(k))
+		value, err := smt.GetDescend([]byte(k))
 		if err != nil {
 			t.Errorf("error: %v", err)
 		}

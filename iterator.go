@@ -192,7 +192,7 @@ func (i *iterator) LeafKey() []byte {
 func (i *iterator) LeafValue() ([]byte, error) {
 	leaf := i.peek()
 
-	path, _ := i.trie.th.parseLeaf(leaf.rawNode)
+	_, value := i.trie.th.parseLeaf(leaf.rawNode)
 
-	return i.trie.values.Get(path)
+	return value, nil
 }

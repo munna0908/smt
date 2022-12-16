@@ -66,6 +66,7 @@ func (smt *SparseMerkleTree) depth() int {
 	return smt.th.pathSize() * 8
 }
 
+/*
 // Get gets the value of a key from the tree.
 func (smt *SparseMerkleTree) Get(key []byte) ([]byte, error) {
 	// Get tree's root
@@ -97,10 +98,12 @@ func (smt *SparseMerkleTree) Get(key []byte) ([]byte, error) {
 	return value, nil
 }
 
+*/
+
 // Has returns true if the value at the given key is non-default, false
 // otherwise.
 func (smt *SparseMerkleTree) Has(key []byte) (bool, error) {
-	val, err := smt.Get(key)
+	val, err := smt.GetDescend(key)
 	return !bytes.Equal(defaultValue, val), err
 }
 
@@ -225,11 +228,13 @@ func (smt *SparseMerkleTree) deleteWithSideNodes(path []byte, sideNodes [][]byte
 }
 
 func (smt *SparseMerkleTree) updateWithSideNodes(path []byte, value []byte, sideNodes [][]byte, pathNodes [][]byte, oldLeafData []byte) ([]byte, error) {
-	valueHash := smt.th.digest(value)
-	currentHash, currentData := smt.th.digestLeaf(path, valueHash)
+	//valueHash := smt.th.digest(value)
+
+	currentHash, currentData := smt.th.digestLeaf(path, value)
 	if err := smt.nodes.Set(currentHash, currentData); err != nil {
 		return nil, err
 	}
+
 	currentData = currentHash
 
 	// If the leaf node that sibling nodes lead to has a different actual path
@@ -239,12 +244,12 @@ func (smt *SparseMerkleTree) updateWithSideNodes(path []byte, value []byte, side
 	// First, get the number of bits that the paths of the two leaf nodes share
 	// in common as a prefix.
 	var commonPrefixCount int
-	var oldValueHash []byte
+	var oldValue []byte
 	if bytes.Equal(pathNodes[0], smt.th.placeholder()) {
 		commonPrefixCount = smt.depth()
 	} else {
 		var actualPath []byte
-		actualPath, oldValueHash = smt.th.parseLeaf(oldLeafData)
+		actualPath, oldValue = smt.th.parseLeaf(oldLeafData)
 		commonPrefixCount = countCommonPrefix(path, actualPath)
 	}
 	if commonPrefixCount != smt.depth() {
@@ -260,9 +265,9 @@ func (smt *SparseMerkleTree) updateWithSideNodes(path []byte, value []byte, side
 		}
 
 		currentData = currentHash
-	} else if oldValueHash != nil {
+	} else if oldValue != nil {
 		// Short-circuit if the same value is being set
-		if bytes.Equal(oldValueHash, valueHash) {
+		if bytes.Equal(oldValue, value) {
 			return smt.root, nil
 		}
 		// If an old leaf exists, remove it
@@ -311,9 +316,6 @@ func (smt *SparseMerkleTree) updateWithSideNodes(path []byte, value []byte, side
 			return nil, err
 		}
 		currentData = currentHash
-	}
-	if err := smt.values.Set(path, value); err != nil {
-		return nil, err
 	}
 
 	return currentHash, nil
@@ -365,6 +367,7 @@ func (smt *SparseMerkleTree) sideNodesForRoot(path []byte, root []byte, getSibli
 		if bytes.Equal(nodeHash, smt.th.placeholder()) {
 			// If the node is a placeholder, we've reached the end.
 			currentData = nil
+
 			break
 		}
 

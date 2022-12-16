@@ -30,7 +30,7 @@ func (proof *SparseMerkleProof) sanityCheck(th *treeHasher) bool {
 	if len(proof.SideNodes) > th.pathSize()*8 ||
 
 		// Check that leaf data for non-membership proofs is the correct size.
-		(proof.NonMembershipLeafData != nil && len(proof.NonMembershipLeafData) != len(leafPrefix)+th.pathSize()+th.hasher.Size()) {
+		(proof.NonMembershipLeafData != nil && len(proof.NonMembershipLeafData) <= len(leafPrefix)+th.pathSize()) {
 		return false
 	}
 
@@ -122,20 +122,20 @@ func verifyProofWithUpdates(proof SparseMerkleProof, root []byte, key []byte, va
 		if proof.NonMembershipLeafData == nil { // Leaf is a placeholder value.
 			currentHash = th.placeholder()
 		} else { // Leaf is an unrelated leaf.
-			actualPath, valueHash := th.parseLeaf(proof.NonMembershipLeafData)
+			actualPath, value := th.parseLeaf(proof.NonMembershipLeafData)
 			if bytes.Equal(actualPath, key) {
 				// This is not an unrelated leaf; non-membership proof failed.
 				return false, nil
 			}
-			currentHash, currentData = th.digestLeaf(actualPath, valueHash)
+			currentHash, currentData = th.digestLeaf(actualPath, value)
 
 			update := make([][]byte, 2)
 			update[0], update[1] = currentHash, currentData
 			updates = append(updates, update)
 		}
 	} else { // Membership proof.
-		valueHash := th.digest(value)
-		currentHash, currentData = th.digestLeaf(key, valueHash)
+		//	valueHash := th.digest(value)
+		currentHash, currentData = th.digestLeaf(key, value)
 		update := make([][]byte, 2)
 		update[0], update[1] = currentHash, currentData
 		updates = append(updates, update)

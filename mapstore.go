@@ -48,10 +48,11 @@ func (sm *SimpleMap) Set(key []byte, value []byte) error {
 
 // Delete deletes a key.
 func (sm *SimpleMap) Delete(key []byte) error {
-	_, ok := sm.m[string(key)]
-	if ok {
+	if _, ok := sm.m[string(key)]; ok {
 		delete(sm.m, string(key))
 		return nil
 	}
-	return &InvalidKeyError{Key: key}
+
+	return nil
+	//return &InvalidKeyError{Key: key}
 }

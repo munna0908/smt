@@ -37,7 +37,7 @@ func Fuzz(input []byte) int {
 		op := op(int(b) % int(Noop))
 		switch op {
 		case Get:
-			tree.Get(key())
+			tree.GetDescend(key())
 		case Update:
 			value := make([]byte, 32)
 			binary.BigEndian.PutUint64(value, uint64(i))
